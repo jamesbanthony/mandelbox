@@ -16,13 +16,13 @@
 # scale, rMin, rFixed  (2 0.5 1)
 1.420 0.420 1.420
 # max number of iterations, escape time
-20 100
+15 100
 # COLORING
 # type 0 or 1
 2
 # brightness
 1.0
 # super sampling anti aliasing 0 = off, 1 = on
-0
+1
 # IMAGE FILE NAME
 image.bmp

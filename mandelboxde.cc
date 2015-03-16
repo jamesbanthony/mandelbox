@@ -25,23 +25,17 @@
 #include "color.h"
 #include "mandelbox.h"
 
+#define COMP_FOLD(x) { (x) = fabs(x) <= 1? (x) : copysign(2,(x))-(x);}
+
 using namespace std;
 
 inline double SQR( double x) { return x*x; }
 
-inline double component_fold(double x) 
-{
-  if (x>1.0) x = 2.0-x;
-  else 
-    if (x<-1.0) x = -2.0-x;
-  return x;
-}
-
 static void boxFold(vec3 &v)
 {
-  v.x =  component_fold(v.x);
-  v.y =  component_fold(v.y);
-  v.z =  component_fold(v.z);
+  COMP_FOLD(v.x);
+  COMP_FOLD(v.y);
+  COMP_FOLD(v.z);
 }
 
 static void sphereFold(vec3 &v, double &dfactor, double r2, double rMin2, double rFixed2)
