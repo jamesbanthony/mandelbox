@@ -31,7 +31,6 @@ static char buf[BUF_SIZE];
 
 void getParameters(char *filename, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
-  printf("getting parameters...\n");
   FILE *fp;
   int ret;
   double *d;
