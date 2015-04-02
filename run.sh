@@ -25,4 +25,4 @@ echo " .dat files removed."
 echo "Generating video..."
 ffmpeg -start_number 1 -i image%d.jpg -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4
 echo -n "Done!"
-vlc out.avi
+vlc out.mp4
