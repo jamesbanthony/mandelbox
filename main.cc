@@ -40,7 +40,7 @@ int main(int argc, char** argv)
   CameraParams    camera_params;
   RenderParams    renderer_params;
   
-  getParameters(argv[2], &camera_params, &renderer_params, &mandelBox_params);
+  getParameters(argv[1], &camera_params, &renderer_params, &mandelBox_params);
 
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
