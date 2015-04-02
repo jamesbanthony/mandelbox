@@ -1,14 +1,17 @@
+import random
 import sys
-start = sys.argv[1]
-end = sys.argv[2]
+start = 1
+end = 120
+if (len(sys.argv) > 1):
+	end = sys.argv[1]
 
-x = 5		# camera starting points
-y = 20
-z = 40
+x = 14.0		# camera starting points
+y = 14.0
+z = 14.0
 
-scale = 1.20	# mandelbox starting points
+scale = 1.5		# mandelbox starting points
 rMin = 1.0
-rFixed = 5.50
+rFixed = 2.0
 
 for i in range(int(start),int(end)+1):
 	f = open("params"+str(i)+".dat", 'w')
@@ -17,7 +20,7 @@ for i in range(int(start),int(end)+1):
 	s += '0 1 0\n'										# up vector
 	s += '1.2\n'										# fov
 	s += '500 500\n'									# resolution
-	s += '-2.00\n'										# detail level
+	s += '-3.5\n'										# detail level
 	s += str(scale)+' '+str(rMin)+' '+str(rFixed)+'\n'	# mandelbox (scale,rMin,rFixed)
 	s += '15 100\n'										# max iter, escape
 	s += '1\n'											# color
@@ -27,10 +30,10 @@ for i in range(int(start),int(end)+1):
 	f.write(s)
 	f.close()
 	
-	x = x-0.15										# change in camera pos (per frame)
-	y = y-0.15
-	z = z-0.15
+	x = x*0.97				# change in camera pos (per frame)
+	y = y*0.98
+	z = z*0.99
 	
-	scale = scale+0 								# change in mandelbox (per frame)
+	scale = scale+0 		# change in mandelbox (per frame)
 	rMin = rMin+0
 	rFixed = rFixed+0
