@@ -8,5 +8,5 @@ do
 	echo working on $i;
     ./mandelbox ./params$i.dat
 done
-rm *.dat
+rm params*.dat
 ffmpeg -f image2 -r 30 -i image%d.bmp ./out.mov
