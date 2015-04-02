@@ -70,19 +70,22 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params)
   
   for (int i=0; i < params.num_iter; i++) 
     {
-      // box fold
-      boxFold(p);
-      r2 = p.Dot(p);      
+      if (r2 <= escape)
+      {
+        // box fold
+        boxFold(p);
+        r2 = p.Dot(p);      
 
-      // sphere fold
-      sphereFold(p,dfactor,r2,rMin2,rFixed2);
-      
-      // scale
-      p = p*scale+p0;
-      
-      dfactor *= fabs(scale);
-      assert(dfactor>0);
-      if ( r2 > escape ) break;		
+        // sphere fold
+        sphereFold(p,dfactor,r2,rMin2,rFixed2);
+        
+        // scale
+        p = p*scale+p0;
+        
+        dfactor *= fabs(scale);
+        assert(dfactor>0);
+      }
+      //if ( r2 > escape ) break;		
     }
   r2 = p.Magnitude();
   assert(r2>=0);
