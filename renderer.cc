@@ -59,11 +59,14 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	  
 	  double time = getTime();
 	  
-	  
+	  #pragma omp for
 	  for(int j = 0; j < height; j++)
 	    {
 	      //for each column pixel in the row
-	      #pragma omp for
+
+	  for(int j = 0; j < height; j++)
+	    {
+	      //for each column pixel in the row
 	      for(int i = 0; i <width; i++)
 			{
 			  vec3 color;
@@ -115,7 +118,6 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 			  image[k+1] = (unsigned char)(color.y * 255);
 			  image[k+2] = (unsigned char)(color.z * 255);
 			}
-	      //printProgress((j+1)/(double)height,getTime()-time);
 	    }
 	    #pragma omp critical
 		{

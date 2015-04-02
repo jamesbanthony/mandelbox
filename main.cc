@@ -23,21 +23,30 @@
 #include "camera.h"
 #include "renderer.h"
 #include "mandelbox.h"
+#include <omp.h>
 
 void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
 		   MandelBoxParams *mandelBox_paramsP);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
 void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image);
 void saveBMP      (const char* filename, const unsigned char* image, int width, int height);
+void Hello(void);
 
 MandelBoxParams mandelBox_params;
 
+int thread_count;
+
 int main(int argc, char** argv)
 {
+  thread_count = strtol(argv[1], NULL, 10);
+
+  #pragma omp parallel num_threads(thread_count)
+  Hello();
+
   CameraParams    camera_params;
   RenderParams    renderer_params;
   
-  getParameters(argv[1], &camera_params, &renderer_params, &mandelBox_params);
+  getParameters(argv[2], &camera_params, &renderer_params, &mandelBox_params);
 
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
@@ -51,4 +60,11 @@ int main(int argc, char** argv)
   free(image);
 
   return 0;
+}
+
+void Hello(void){
+  int my_rank = omp_get_thread_num();
+  int thread_count = omp_get_num_threads();
+
+  printf("Hello from thread %d of %d\n", my_rank, thread_count);
 }

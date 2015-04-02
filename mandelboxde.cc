@@ -24,6 +24,7 @@
 #include <assert.h>
 #include "color.h"
 #include "mandelbox.h"
+#include <omp.h>
 
 #define COMP_FOLD(x) { (x) = fabs(x) <= 1? (x) : copysign(2,(x))-(x);}
 
@@ -67,7 +68,7 @@ double MandelBoxDE(const vec3 &p0, const MandelBoxParams &params)
   
   double c1 = fabs(scale - 1.0);
   double c2 = pow( fabs(scale), 1 - params.num_iter);
-  
+
   for (int i=0; i < params.num_iter; i++) 
     {
       if (r2 <= escape)
