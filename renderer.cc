@@ -28,7 +28,7 @@
 #include "3d.h"
 #include <omp.h>
 
-#define THREAD_COUNT 4
+#define CHUNK_SIZE 1920
 
 extern double getTime();
 extern void   printProgress( double perc, double time );
@@ -59,7 +59,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	  
 	pixelData pix_data;
 	  	  
-#pragma omp for schedule(dynamic, THREAD_COUNT) collapse(2)
+#pragma omp for schedule(auto, CHUNK_SIZE) collapse(2)
 	for(j = 0; j < height; j++){ //for each column pixel in the row
 		for(int i = 0; i <width; i++){
 			vec3 color;
@@ -110,10 +110,10 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 			image[k+2] = (unsigned char)(color.z * 255);
 		}
 	}
-#pragma omp critical reduction(+:superImage[n])
+#pragma omp critical
 {
 	for(int n=0; n<image_size*3; ++n){
-		superImage[n] += image[n];
+		superImage[n] = image[n];
 	}
 }//omp critical
 
