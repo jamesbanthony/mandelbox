@@ -40,7 +40,6 @@ extern vec3 getColour(const pixelData &pixData, const RenderParams &render_param
 void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, 
 		   unsigned char* superImage)
 {
-  printf("rendering fractal...\n");
   
   int image_size = renderer_params.width * renderer_params.height;
   int j = 0;
@@ -59,7 +58,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	  
 	pixelData pix_data;
 	  	  
-#pragma omp for schedule(dynamic, THREAD_COUNT) collapse(2)
+#pragma omp for schedule(auto, THREAD_COUNT) collapse(2)
 	for(j = 0; j < height; j++){ //for each column pixel in the row
 		for(int i = 0; i <width; i++){
 			vec3 color;
@@ -110,14 +109,13 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 			image[k+2] = (unsigned char)(color.z * 255);
 		}
 	}
-#pragma omp critical reduction(+:superImage[n])
+#pragma omp critical
 {
 	for(int n=0; n<image_size*3; ++n){
-		superImage[n] += image[n];
+		superImage[n] = image[n];
 	}
 }//omp critical
 
 }//omp parallel
 	
-  printf("\n rendering done:\n");
 }
