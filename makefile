@@ -1,6 +1,5 @@
-LDFLAGS = -lm -fopenmp -std=c++11
-CFLAGS= -pg -O3 -Wall -fopenmp -std=c++11
-CXXFLAGS= -pg -O3 -Wall -fopenmp -std=c++11
+LDFLAGS = -lm -fopenmp 
+CFLAGS= -pg -O3 -Wall -std=c++11
 
 CC=g++
 RM=rm
@@ -11,7 +10,7 @@ $(PROGRAM_NAME): main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o d
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 rs: $(PROGRAM_NAME)
-	./$(PROGRAM_NAME)$(EXEXT) params.dat; pqiv image.bmp -c -i
+	./$(PROGRAM_NAME)$(EXEXT) params.dat; viewnior image.bmp
 
 c:
 	$(RM) *.o $(PROGRAM_NAME)$(EXEEXT) 

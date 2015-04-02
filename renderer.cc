@@ -28,7 +28,7 @@
 #include "3d.h"
 #include <omp.h>
 
-#define thread_count 4
+#define THREAD_COUNT 4
 
 extern double getTime();
 extern void   printProgress( double perc, double time );
@@ -43,90 +43,81 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   printf("rendering fractal...\n");
   
   int image_size = renderer_params.width * renderer_params.height;
-  #pragma omp parallel num_threads(thread_count)
-  {
-  	  unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
-  	  
-	  double farPoint[3];
-	  vec3 to, from;
-	  
-	  from.SetDoublePoint(camera_params.camPos);
-	  
-	  int height = renderer_params.height;
-	  int width  = renderer_params.width;
-	  
-	  pixelData pix_data;
-	  
-	  double time = getTime();
-	  
-	  #pragma omp for
-	  for(int j = 0; j < height; j++)
-	    {
-	      //for each column pixel in the row
+  int j = 0;
 
-	  for(int j = 0; j < height; j++)
-	    {
-	      //for each column pixel in the row
-	      for(int i = 0; i <width; i++)
-			{
-			  vec3 color;
-			  if( renderer_params.super_sampling == 1 )
-			    {
-			      vec3 samples[9];
-			      int idx = 0;
-			      for(int ssj = -1; ssj < 2; ssj++){
-				    for(int ssi = -1; ssi< 2; ssi++){
-				    UnProject(i+ssi*0.5, j+ssj*0.5, camera_params, farPoint);
+#pragma omp parallel shared(j, superImage)
+{
+	unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
+  	  
+	double farPoint[3];
+	vec3 to, from;
+	  
+	from.SetDoublePoint(camera_params.camPos);
+	  
+	int height = renderer_params.height;
+	int width  = renderer_params.width;
+	  
+	pixelData pix_data;
+	  	  
+#pragma omp for schedule(dynamic, THREAD_COUNT) collapse(2)
+	for(j = 0; j < height; j++){ //for each column pixel in the row
+		for(int i = 0; i <width; i++){
+			vec3 color;
+			if( renderer_params.super_sampling == 1 ){
+				vec3 samples[9];
+			    int idx = 0;
+			    for(int ssj = -1; ssj < 2; ssj++){
+					for(int ssi = -1; ssi< 2; ssi++){
+				    	UnProject(i+ssi*0.5, j+ssj*0.5, camera_params, farPoint);
 				  
-				    // to = farPoint - camera_params.camPos
-				    to = SubtractDoubleDouble(farPoint,camera_params.camPos);
-				    to.Normalize();
+				    	// to = farPoint - camera_params.camPos
+				    	to = SubtractDoubleDouble(farPoint,camera_params.camPos);
+				    	to.Normalize();
 				  
-				    //render the pixel
-				    rayMarch(renderer_params, from, to, pix_data);
+				    	//render the pixel
+				    	rayMarch(renderer_params, from, to, pix_data);
 				  
-				    //get the colour at this pixel
-				    samples[idx] = getColour(pix_data, renderer_params, from, to);
-				    idx++;
+				    	//get the colour at this pixel
+				    	samples[idx] = getColour(pix_data, renderer_params, from, to);
+				    	idx++;
 				    }
-			      }
-			      color = (samples[0]*0.05 + samples[1]*0.1 + samples[2]*0.05 + 
-				       samples[3]*0.1  + samples[4]*0.4 + samples[5]*0.1  + 
-				       samples[6]*0.05 + samples[7]*0.1 + samples[8]*0.05);
-			      
 			    }
-			  else
-			    {
-			      // get point on the 'far' plane
-			      // since we render one frame only, we can use the more specialized method
-			      UnProject(i, j, camera_params, farPoint);
+			    color = (samples[0]*0.05 + samples[1]*0.1 + samples[2]*0.05 + 
+				    samples[3]*0.1  + samples[4]*0.4 + samples[5]*0.1  + 
+				    samples[6]*0.05 + samples[7]*0.1 + samples[8]*0.05);
 			      
-			      // to = farPoint - camera_params.camPos
-			      to = SubtractDoubleDouble(farPoint,camera_params.camPos);
-			      to.Normalize();
-			      
-			      //render the pixel
-			      rayMarch(renderer_params, from, to, pix_data);
-			      
-			      //get the colour at this pixel
-			      color = getColour(pix_data, renderer_params, from, to);
-			    }
-			  
-			  //save colour into texture
-			  int k = (j * width + i)*3;
-			  image[k] = (unsigned char)(color.x * 255);
-			  image[k+1] = (unsigned char)(color.y * 255);
-			  image[k+2] = (unsigned char)(color.z * 255);
 			}
-	    }
-	    #pragma omp critical
-		{
-	        for(int n=0; n<image_size*3; ++n) 
-	        {
-	            superImage[n] += image[n];
-	        }
+			else{
+				// get point on the 'far' plane
+			    // since we render one frame only, we can use the more specialized method
+				UnProject(i, j, camera_params, farPoint);
+			      
+			    // to = farPoint - camera_params.camPos
+			    to = SubtractDoubleDouble(farPoint,camera_params.camPos);
+			    to.Normalize();
+			      
+			    //render the pixel
+			    rayMarch(renderer_params, from, to, pix_data);
+			      
+			    //get the colour at this pixel
+			    color = getColour(pix_data, renderer_params, from, to);
+			}
+			  
+			//save colour into texture
+			int k = (j * width + i)*3;
+			image[k] = (unsigned char)(color.x * 255);
+			image[k+1] = (unsigned char)(color.y * 255);
+			image[k+2] = (unsigned char)(color.z * 255);
 		}
 	}
+#pragma omp critical reduction(+:superImage[n])
+{
+	for(int n=0; n<image_size*3; ++n){
+		superImage[n] += image[n];
+	}
+}//omp critical
+
+}//omp parallel
 	
   printf("\n rendering done:\n");
 }
