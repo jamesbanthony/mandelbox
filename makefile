@@ -1,6 +1,6 @@
 LDFLAGS = -lm
-CFLAGS= -pg -O3 -Wall
-CXXFLAGS= -pg -O3 -Wall
+CFLAGS= -pg -O3 -Wall -fopenmp
+CXXFLAGS= -pg -O3 -Wall -fopenmp
 CC=g++
 RM=rm
 
@@ -10,7 +10,7 @@ $(PROGRAM_NAME): main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o d
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 rs: $(PROGRAM_NAME)
-	./$(PROGRAM_NAME)$(EXEXT) params.dat; viewnior image.bmp
+	./$(PROGRAM_NAME) 1 $(EXEXT) params.dat; viewnior image.bmp
 
 c:
 	$(RM) *.o $(PROGRAM_NAME)$(EXEEXT) 
