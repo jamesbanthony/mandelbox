@@ -107,8 +107,5 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	if(rank == 0)
       printProgress((j+1)/(double)height,getTime()-time);
   }
-  //Send partial image back to process 0
-  printf("Process %d sending to process 0...\n", rank);
-  MPI_Send(image, (chunk_size*width), MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
   printf("\n rendering done:\n");
 }
