@@ -1,4 +1,5 @@
-/*  This file is part of the Mandelbox program developed for the course
+/*
+   This file is part of the Mandelbox program developed for the course
     CS/SE  Distributed Computer Systems taught by N. Nedialkov in the
     Winter of 2015 at McMaster University.
 

@@ -38,6 +38,7 @@ void printProgress( double perc, double time )
   sprintf(delete_space, OutputString, perc, "%%", hr, min, sec, time);
 
   fprintf( stderr, delete_space);
-  for ( unsigned int i = 0; i < strlen(delete_space); i++)
+  unsigned int i;
+  for ( i = 0; i < strlen(delete_space); i++)
     fputc( 8, stderr);
 }
