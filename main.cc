@@ -93,7 +93,7 @@ void mergeImages(unsigned char *image, unsigned char *partial_image, int chunk_s
   int c = chunk_size;
   int w = width;
 
-  for(int i = 0; i < (c*w); i++){
+  for(int i = 0; i < (c*w)*3; i++){
     int l = (r*(c*w))+i;
     image[l] = partial_image[i];
     image[l+1] = partial_image[i+1];

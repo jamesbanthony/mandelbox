@@ -56,7 +56,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   int width  = renderer_params.width;
 
   double time = getTime();
-  for(int j = local_start; j < local_end; j++){
+  for(int j = 0; j < chunk_size; j++){
     for(int i = 0; i < width; i++){
 	  vec3 color;
 	  if( renderer_params.super_sampling == 1 ){
