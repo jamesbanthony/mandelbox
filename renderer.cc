@@ -25,6 +25,7 @@
 #include "camera.h"
 #include "vector3d.h"
 #include "3d.h"
+#include <mpi.h>
 
 extern double getTime();
 extern void   printProgress( double perc, double time );
@@ -107,6 +108,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
       printProgress((j+1)/(double)height,getTime()-time);
   }
   //Send partial image back to process 0
+  printf("Process %d sending to process 0...\n", rank);
   MPI_Send(image, (chunk_size*width), MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
   printf("\n rendering done:\n");
 }
