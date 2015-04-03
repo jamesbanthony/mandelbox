@@ -1,28 +1,28 @@
 # CAMERA
 # location  x,y,z   (7,7,7)
-13 15 30
+13 5 45
 # look_at (target)  x,y,z
 0 0 0 
 # up vector x,y,z;  (0, 1, 0)
 0 1 0
 # field of view     (1)
-1.2  
+1
 # IMAGE
 # width height
 1920 1080
 # detail level, the smaller the more detailed (-3)
--3.50
+-3.0
 # MANDELBOX
 # scale, rMin, rFixed  (2 0.5 1)
-1.420 0.420 1.420
+1.20 0.2 0.750
 # max number of iterations, escape time
 15 100
 # COLORING
 # type 0 or 1
-2
+4
 # brigtness
 1.0
 # super sampling anti aliasing 0 = off, 1 = on
-1
+0
 # IMAGE FILE NAME
 image.bmp

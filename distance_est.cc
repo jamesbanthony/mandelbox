@@ -20,7 +20,6 @@
 */
 #include "vector3d.h"
 #include "mandelbox.h"
-#include <stdio.h>
 
 extern MandelBoxParams mandelBox_params;
 extern double MandelBoxDE(const vec3 &pos, const MandelBoxParams &mPar);

@@ -38,7 +38,7 @@ static const vec3 backColor(0.8156,1.0,0.619);
 
 void lighting(const vec3 &n, const vec3 &color, const vec3 &pos, const vec3 &direction,  vec3 &outV)
 {
-  vec3 nn = n -1.0;
+  vec3 nn = n - 1;
   double ambient = max( CamLightMin, nn.Dot(direction) )*CamLightW;
   outV = CamLight*ambient*color;
 }
@@ -55,22 +55,33 @@ vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
       lighting(pixData.normal, hitColor, pixData.hit, direction, hitColor);
       
       //add normal based colouring
-      if(render_params.colourType == 0 || render_params.colourType == 1)
-	  {
-	    hitColor = hitColor * pixData.normal;
-	    hitColor = (hitColor + 1.0)/2.0;
-	    hitColor = hitColor*render_params.brightness;
-	  
-	    //gamma correction
-	    clamp(hitColor, 0.0, 1.0);
-	    hitColor = hitColor*hitColor;
- 	  }
+      if(render_params.colourType == 0 || render_params.colourType == 1 || render_params.colourType == 4)
+  	  {
+  	    hitColor = hitColor * pixData.normal;
+  	    hitColor = (hitColor + 1.0)/2.0;
+  	    hitColor = hitColor*render_params.brightness;
+  	  
+  	    //gamma correction
+  	    clamp(hitColor, 0.0, 1.0);
+  	    hitColor = hitColor*hitColor;
+   	  }
+
+      if(render_params.colourType == 4)
+      {
+        hitColor = hitColor * pixData.normal;
+        hitColor = (hitColor + 1.0)/1.6;
+        hitColor = hitColor*render_params.brightness;
+      
+        //gamma correction
+        clamp(hitColor, 0.0, 1.0);
+        hitColor = hitColor*hitColor;
+      }
       if(render_params.colourType == 1)
-	  {
-	    //"swap" colors
-	    double t = hitColor.x;
-	    hitColor.x = hitColor.z;
-	    hitColor.z = t;
+  	  {
+  	    //"swap" colors
+  	    double t = hitColor.x;
+  	    hitColor.x = hitColor.z;
+  	    hitColor.z = t;
       }
       if(render_params.colourType == 2)
       {
@@ -81,6 +92,13 @@ vec3 getColour(const pixelData &pixData, const RenderParams &render_params,
         //"swap" colors
         double t = hitColor.y;
         hitColor.y = hitColor.z;
+        hitColor.z = t;
+      }
+      if(render_params.colourType == 4)
+      {
+        //"swap" colors
+        double t = hitColor.x;
+        hitColor.x = hitColor.z;
         hitColor.z = t;
       }
     }

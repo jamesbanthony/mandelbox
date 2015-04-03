@@ -20,12 +20,13 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
 #include "camera.h"
 #include "renderer.h"
 #include "mandelbox.h"
 #include <omp.h>
 
-#define NUM_THREADS 4
 void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
 		   MandelBoxParams *mandelBox_paramsP);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
@@ -35,13 +36,20 @@ void Hello(void);
 
 MandelBoxParams mandelBox_params;
 
+int thread_count;
+
 int main(int argc, char** argv)
 {
+  double time;
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+
+  thread_count = strtol(argv[1], NULL, 10);
 
   CameraParams    camera_params;
   RenderParams    renderer_params;
   
-  getParameters(argv[1], &camera_params, &renderer_params, &mandelBox_params);
+  getParameters(argv[2], &camera_params, &renderer_params, &mandelBox_params);
 
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
@@ -49,10 +57,13 @@ int main(int argc, char** argv)
   init3D(&camera_params, &renderer_params);
 
   renderFractal(camera_params, renderer_params, image);
-  
   saveBMP(renderer_params.file_name, image, renderer_params.width, renderer_params.height);
   
   free(image);
+
+  gettimeofday(&end, NULL);
+  time = end.tv_sec-start.tv_sec+(end.tv_usec - start.tv_usec)*1.e-6;
+  printf("Total time time: %f\n", time);
 
   return 0;
 }

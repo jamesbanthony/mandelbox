@@ -47,7 +47,7 @@ void rayMarch(const RenderParams &render_params, const vec3 &from, const vec3  &
       
       epsModified = totalDist*eps;
       if (dist < epsModified || totalDist > render_params.maxDistance) 
-	break;
+        break;
     }
   
   vec3 hitNormal;

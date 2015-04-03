@@ -31,12 +31,13 @@ static char buf[BUF_SIZE];
 
 void getParameters(char *filename, CameraParams *camP, RenderParams *renP, MandelBoxParams *boxP)
 {
+  printf("getting parameters...\n");
   FILE *fp;
   int ret;
   double *d;
   
   renP->fractalType = 0;
-  renP->maxRaySteps = 2000;
+  renP->maxRaySteps = 150;
   renP->maxDistance = 100;
 
   fp = fopen(filename,"r");
