@@ -50,7 +50,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   int chunk_size  = chunk;
   int local_start = start;
   int local_end   = end;
-  printf("process %d is rendering px %d - %d\n", rank, local_start, local_end);
+  //printf("process %d is rendering px %d - %d\n", rank, local_start, local_end);
 
   int height = renderer_params.height;
   int width  = renderer_params.width;

@@ -53,21 +53,30 @@ int main(int argc, char** argv)
   int chunk_size  = ((renderer_params.height)/num_proc);
   int local_start = (chunk_size * my_rank) + 1;
   int local_end   = (chunk_size * (my_rank +1));
-  unsigned char *partial_image = (unsigned char*)malloc(3*(renderer_params.width*chunk_size)*sizeof(unsigned char));
+  int s = (chunk_size * renderer_params.width)*3;
+  unsigned char *partial_image = (unsigned char*)malloc(s*sizeof(unsigned char));
 
   renderFractal(camera_params, renderer_params, partial_image, local_start, local_end, chunk_size, my_rank); 
-  MPI_Send(partial_image, sizeof(partial_image), MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
+  
+  if(my_rank != 0){
+    MPI_Send(partial_image, s, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
+    printf("process %d sent partial image...\n", my_rank);
+  }
 
   //Collect partial images and merge into final image
   if(my_rank == 0){
-
+    printf("process 0 has partial image from process 0...\n");
     int image_size = renderer_params.width * renderer_params.height;
     unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
 
-    for(int r = 0; r < num_proc; r++){
+    //Add partial image from process 0
+    mergeImages(image, partial_image, chunk_size, 0, renderer_params.width);
+
+    //Add partial images from other processes
+    for(int r = 1; r < num_proc; r++){
       unsigned char *temp_image = (unsigned char*)malloc(3*(renderer_params.width*chunk_size)*sizeof(unsigned char));
 
-      MPI_Recv(temp_image, (chunk_size*renderer_params.width), MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD, &status);
+      MPI_Recv(temp_image, s, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD, &status);
       printf("process 0 received partial image from process %d...\n", r);
 
       mergeImages(image, temp_image, chunk_size, r, renderer_params.width);
@@ -84,7 +93,7 @@ void mergeImages(unsigned char *image, unsigned char *partial_image, int chunk_s
   int c = chunk_size;
   int w = width;
 
-  for(int i = 0; i < (c*w)*3; i++){
+  for(int i = 0; i < (c*w); i++){
     int l = (r*(c*w))+i;
     image[l] = partial_image[i];
     image[l+1] = partial_image[i+1];
