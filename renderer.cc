@@ -37,8 +37,6 @@ extern vec3 getColour(const pixelData &pixData, const RenderParams &render_param
 void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, 
 		   unsigned char* image, int start, int end, int chunk, int rank)
 {
-
-  printf("process %d rendering fractal...\n", rank);
   
   double farPoint[3];
   vec3 to, from;
@@ -56,7 +54,7 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
   int width  = renderer_params.width;
 
   double time = getTime();
-  for(int j = 0; j < chunk_size; j++){
+  for(int j = local_start; j < local_end+1; j++){
     for(int i = 0; i < width; i++){
 	  vec3 color;
 	  if( renderer_params.super_sampling == 1 ){
@@ -99,13 +97,10 @@ void renderFractal(const CameraParams &camera_params, const RenderParams &render
 	  }
 	  
 	  //save colour into texture
-	  int k = (j * width + i)*3;
+	  int k = ((j-local_start) * width + i)*3;
 	  image[k] = (unsigned char)(color.x * 255);
 	  image[k+1] = (unsigned char)(color.y * 255);
 	  image[k+2]   = (unsigned char)(color.z * 255);
 	}
-	if(rank == 0)
-      printProgress((j+1)/(double)height,getTime()-time);
   }
-  printf("\n rendering done:\n");
 }

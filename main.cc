@@ -24,13 +24,15 @@
 #include "renderer.h"
 #include "mandelbox.h"
 #include <mpi.h>
+#include <math.h>
 
+extern double getTime();
 void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
 		   MandelBoxParams *mandelBox_paramsP);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
 void renderFractal(const CameraParams &camera_params, const RenderParams &renderer_params, unsigned char* image, int start, int end, int chunk, int rank);
 void saveBMP      (const char* filename, const unsigned char* image, int width, int height);
-void mergeImages  (unsigned char* image, unsigned char* partial_image, int chunk_size, int my_rank, int width);
+void printTime(double time, int rank);
 
 MandelBoxParams mandelBox_params;
 
@@ -55,45 +57,37 @@ int main(int argc, char** argv)
   int local_end   = (chunk_size * (my_rank +1));
   int s = (chunk_size * renderer_params.width)*3;
   unsigned char *partial_image = (unsigned char*)malloc(s*sizeof(unsigned char));
+  int image_size = renderer_params.width * renderer_params.height;
+  unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));  
 
+  double totalTime = getTime();
+  double time = getTime();
   renderFractal(camera_params, renderer_params, partial_image, local_start, local_end, chunk_size, my_rank); 
-  
+  printf("Fractal Generation > ");
+  printTime(getTime()-time,my_rank);
+
+  double time2 = getTime();
+  MPI_Gather(partial_image,s,MPI_UNSIGNED_CHAR,image,s,MPI_UNSIGNED_CHAR,0,MPI_COMM_WORLD);
+  printf("Send to P0         > ");
+  printTime(getTime()-time2,my_rank);
+
   //Collect partial images and merge into final image
   if(my_rank == 0){
-    printf("process 0 has partial image from process 0...\n");
-    int image_size = renderer_params.width * renderer_params.height;
-    unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));
-
-    //Add partial image from process 0
-    mergeImages(image, partial_image, chunk_size, 0, renderer_params.width);
-
-    //Add partial images from other processes
-    for(int r = 1; r < num_proc; r++){
-      unsigned char *temp_image = (unsigned char*)malloc(s*sizeof(unsigned char));
-
-      MPI_Recv(temp_image, s, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD, &status);
-      printf("process 0 received partial image from process %d...\n", r);
-
-      mergeImages(image, temp_image, chunk_size, r, renderer_params.width);
-    }
     saveBMP(renderer_params.file_name, image, renderer_params.width, renderer_params.height);
     free(image);
-  }
-  else{
-    MPI_Send(partial_image, s, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
-    printf("process %d sent partial image...\n", my_rank);
+    printf("Total Time         > ");
+    printTime(getTime()-totalTime,my_rank);
   }
 
   MPI_Finalize();
 }
 
-void mergeImages(unsigned char *image, unsigned char *partial_image, int chunk_size, int my_rank, int width){
-  int r = my_rank;
-  int total_chunk = (width*chunk_size)*3;
-  //loop over each pixel in partial image
-  for(int i = 1; i < total_chunk; i++){
-    //loop over relevant pixel in main image
-    int l = (total_chunk*r)+i;
-    image[l] = partial_image[i];
-  }
+void printTime(double time, int rank)
+{
+  int sec = ceil(time);
+  int hr = sec/3600;
+  int t = sec%3600;
+  int min = t/60;
+  sec = t%60;
+  printf("p%d took %02d:%02d:%02d.\n",rank,hr,min,sec);
 }
