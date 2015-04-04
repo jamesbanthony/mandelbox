@@ -26,7 +26,7 @@
 #include <mpi.h>
 #include <math.h>
 
-extern double getTime();
+extern double MPI_Wtime();
 void getParameters(char *filename, CameraParams *camera_params, RenderParams *renderer_params,
 		   MandelBoxParams *mandelBox_paramsP);
 void init3D       (CameraParams *camera_params, const RenderParams *renderer_params);
@@ -60,23 +60,24 @@ int main(int argc, char** argv)
   int image_size = renderer_params.width * renderer_params.height;
   unsigned char *image = (unsigned char*)malloc(3*image_size*sizeof(unsigned char));  
 
-  double totalTime = getTime();
-  double time = getTime();
+  double totalTime = MPI_Wtime();
+  double time = MPI_Wtime();
   renderFractal(camera_params, renderer_params, partial_image, local_start, local_end, chunk_size, my_rank); 
   printf("Fractal Generation > ");
-  printTime(getTime()-time,my_rank);
+  printTime(MPI_Wtime()-time,my_rank);
 
-  double time2 = getTime();
+  double time2 = MPI_Wtime();
   MPI_Gather(partial_image,s,MPI_UNSIGNED_CHAR,image,s,MPI_UNSIGNED_CHAR,0,MPI_COMM_WORLD);
+  free(partial_image);
   printf("Send to P0         > ");
-  printTime(getTime()-time2,my_rank);
+  printTime(MPI_Wtime()-time2,my_rank);
 
   //Collect partial images and merge into final image
   if(my_rank == 0){
     saveBMP(renderer_params.file_name, image, renderer_params.width, renderer_params.height);
     free(image);
     printf("Total Time         > ");
-    printTime(getTime()-totalTime,my_rank);
+    printTime(MPI_Wtime()-totalTime,my_rank);
   }
 
   MPI_Finalize();
