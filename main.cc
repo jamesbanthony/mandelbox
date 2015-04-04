@@ -58,11 +58,6 @@ int main(int argc, char** argv)
 
   renderFractal(camera_params, renderer_params, partial_image, local_start, local_end, chunk_size, my_rank); 
   
-  if(my_rank != 0){
-    MPI_Send(partial_image, s, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
-    printf("process %d sent partial image...\n", my_rank);
-  }
-
   //Collect partial images and merge into final image
   if(my_rank == 0){
     printf("process 0 has partial image from process 0...\n");
@@ -74,7 +69,7 @@ int main(int argc, char** argv)
 
     //Add partial images from other processes
     for(int r = 1; r < num_proc; r++){
-      unsigned char *temp_image = (unsigned char*)malloc(3*(renderer_params.width*chunk_size)*sizeof(unsigned char));
+      unsigned char *temp_image = (unsigned char*)malloc(s*sizeof(unsigned char));
 
       MPI_Recv(temp_image, s, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD, &status);
       printf("process 0 received partial image from process %d...\n", r);
@@ -84,19 +79,21 @@ int main(int argc, char** argv)
     saveBMP(renderer_params.file_name, image, renderer_params.width, renderer_params.height);
     free(image);
   }
+  else{
+    MPI_Send(partial_image, s, MPI_UNSIGNED_CHAR, 0, 0, MPI_COMM_WORLD);
+    printf("process %d sent partial image...\n", my_rank);
+  }
 
   MPI_Finalize();
 }
 
 void mergeImages(unsigned char *image, unsigned char *partial_image, int chunk_size, int my_rank, int width){
   int r = my_rank;
-  int c = chunk_size;
-  int w = width;
-
-  for(int i = 0; i < (c*w)*3; i++){
-    int l = (r*(c*w))+i;
+  int total_chunk = (width*chunk_size)*3;
+  //loop over each pixel in partial image
+  for(int i = 1; i < total_chunk; i++){
+    //loop over relevant pixel in main image
+    int l = (total_chunk*r)+i;
     image[l] = partial_image[i];
-    image[l+1] = partial_image[i+1];
-    image[l+2] = partial_image[i+2];
   }
 }
