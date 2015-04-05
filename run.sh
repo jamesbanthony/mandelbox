@@ -14,7 +14,7 @@ echo " .dat files created."
 for i in `seq $START $END`;
 do
 	echo -en "\e[1K\rGenerating mandelbox image $i/$END...";
-    ./mandelbox ./params$i.dat;
+    mpirun -np 4 ./mandelbox ./params$i.dat;
     mogrify -format jpg image$i.bmp;
     rm image$i.bmp
 done

@@ -16,7 +16,7 @@ $(PROGRAM_NAME): main.o print.o timing.o savebmp.o getparams.o 3d.o getcolor.o d
 #	./$(PROGRAM_NAME2)$(EXEXT) params.dat; viewnior image.bmp
 
 rp: $(PROGRAM_NAME)
-	mpirun -np 16 ./$(PROGRAM_NAME)$(EXEXT) params.dat; viewnior image.bmp
+	mpirun -np 4 ./$(PROGRAM_NAME)$(EXEXT) params.dat; pqiv image.bmp
 
 c:
 	$(RM) *.o $(PROGRAM_NAME)$(EXEEXT) 

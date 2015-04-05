@@ -36,6 +36,8 @@ void printTime(double time, int rank);
 
 MandelBoxParams mandelBox_params;
 
+bool PRINTTIMES = false;
+
 int main(int argc, char** argv)
 {
   /* MPI */
@@ -63,21 +65,30 @@ int main(int argc, char** argv)
   double totalTime = MPI_Wtime();
   double time = MPI_Wtime();
   renderFractal(camera_params, renderer_params, partial_image, local_start, local_end, chunk_size, my_rank); 
-  printf("Fractal Generation > ");
-  printTime(MPI_Wtime()-time,my_rank);
+  if (PRINTTIMES) 
+  {
+    printf("Fractal Generation > ");
+    printTime(MPI_Wtime()-time,my_rank);
+  }
 
   double time2 = MPI_Wtime();
   MPI_Gather(partial_image,s,MPI_UNSIGNED_CHAR,image,s,MPI_UNSIGNED_CHAR,0,MPI_COMM_WORLD);
   free(partial_image);
-  printf("Send to P0         > ");
-  printTime(MPI_Wtime()-time2,my_rank);
+  if (PRINTTIMES)
+  {
+    printf("Send to P0         > ");
+    printTime(MPI_Wtime()-time2,my_rank);
+  }
 
   //Collect partial images and merge into final image
   if(my_rank == 0){
     saveBMP(renderer_params.file_name, image, renderer_params.width, renderer_params.height);
     free(image);
-    printf("Total Time         > ");
-    printTime(MPI_Wtime()-totalTime,my_rank);
+    if (PRINTTIMES)
+    {
+      printf("Total Time         > ");
+      printTime(MPI_Wtime()-totalTime,my_rank);
+    }
   }
 
   MPI_Finalize();
